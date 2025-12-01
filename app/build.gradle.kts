@@ -79,7 +79,23 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.4.0")
 
-        // ZXing para lectura de códigos QR
+    // ZXing para lectura de códigos QR
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    //implementacion clima
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("com.google.code.gson:gson:2.11.0")
+    // Versión nueva de Room (compatible con Kotlin moderno)
+    val room_version = "2.8.4"
+
+    dependencies {
+        implementation("androidx.room:room-runtime:$room_version")
+        implementation("androidx.room:room-ktx:$room_version")
+        kapt("androidx.room:room-compiler:$room_version")
+
+
+    }
+
 
 }

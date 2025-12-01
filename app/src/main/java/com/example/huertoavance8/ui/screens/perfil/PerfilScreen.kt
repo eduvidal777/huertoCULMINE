@@ -15,21 +15,22 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(navController: NavController) {
+
     val context = LocalContext.current
     val repository = remember { UsuarioRepository(context) }
     val scope = rememberCoroutineScope()
 
-    // 🔹 Estado para mostrar los datos del usuario
-    var usuarioNombre by remember { mutableStateOf("") }
-    var usuarioCorreo by remember { mutableStateOf("") }
+    var usuarioNombre by remember { mutableStateOf("Sin nombre registrado") }
+    var usuarioCorreo by remember { mutableStateOf("Sin correo registrado") }
 
-    // Cargar usuario desde la BD (el primero encontrado)
+    // Cargar último usuario registrado desde Room
     LaunchedEffect(Unit) {
         scope.launch {
             val usuarios = repository.getAll()
             if (usuarios.isNotEmpty()) {
-                usuarioNombre = usuarios.last().nombre   // último usuario registrado
-                usuarioCorreo = usuarios.last().correo
+                val ultimo = usuarios.last()
+                usuarioNombre = ultimo.nombre
+                usuarioCorreo = ultimo.correo
             }
         }
     }
@@ -37,59 +38,81 @@ fun PerfilScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("👤 Perfil de usuario") },
+                title = { Text("Mi Perfil") },
                 actions = {
-                    TextButton(onClick = { navController.navigate("home") }) {
-                        Text("Inicio", color = MaterialTheme.colorScheme.onPrimary)
+                    TextButton(
+                        onClick = {
+                            navController.navigate("login") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        }
+                    ) {
+                        Text("Cerrar sesión 🔒", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             )
         }
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("🌿 Bienvenido a tu perfil", style = MaterialTheme.typography.titleLarge)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+
+            Text(
+                text = "Perfil de usuario",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text("Nombre: $usuarioNombre", fontWeight = FontWeight.Bold)
-                    Text("Correo: $usuarioCorreo")
+                    Text("Nombre", fontWeight = FontWeight.SemiBold)
+                    Text(usuarioNombre)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Correo", fontWeight = FontWeight.SemiBold)
+                    Text(usuarioCorreo)
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // 🔹 Botón cerrar sesión
-            Button(
-                onClick = {
-                    // “Cerrar sesión” → vuelve al Login
-                    navController.navigate("login") {
-                        popUpTo("home") { inclusive = true }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Cerrar sesión 🔒")
-            }
+            // 🔹 Botón para ir al lector QR
             Button(
                 onClick = { navController.navigate("scanner") },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("📷 Escanear código QR")
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 🔹 Volver al inicio
+            Button(
+                onClick = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Volver al inicio")
+            }
+
 
         }
     }
